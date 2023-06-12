@@ -33,14 +33,13 @@ class CartItem extends React.Component{
                     <img style={styles.image}/>
                 </div>
                 <div className="right-block">
-                    <div style={{fontSize:25}}>{title}</div>
+                    <div style={{fontSize:20}}>{title}</div>
                     <div style={{color:'#777'}}>rs {price}</div>
                     <div style={{color:'#777'}}>Qty: {qty}</div>
                     <div className="cart-item-actions">
                         {/*button */} 
                         <img 
-                           alt="increase" 
-                           className="action-icons" 
+                           alt="increase" className="action-icons" 
                            src="https://cdn-icons-png.flaticon.com/128/3303/3303893.png"
                            onClick={this.increaseQuantity}
                             // onClick={this.increaseQuantity.bind(this)} 
