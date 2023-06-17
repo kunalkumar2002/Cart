@@ -18,39 +18,45 @@ class CartItem extends React.Component{
     //     console.log('this',this)
     // }
     //or in place of this we can use arrow function that willl automaticly Bind
+     
 
-    increaseQuantity = () => {
-        // console.log('this.state' , this.state)
+    // we not need of increment nad decrement function here because we have removed the ststes from 
+    // cartItem component and using props 
 
-        //setState also provide us callback
-        this.setState((prevState) => {
-            return {
-                qty: prevState.qty +1
-            };
-        }, () => {
-            console.log(this.state)
-        });
-    }
+    // increaseQuantity = () => {
+    //     // console.log('this.state' , this.state)
 
-    decreaseQty = () => {
+    //     //setState also provide us callback
+    //     this.setState((prevState) => {
+    //         return {
+    //             qty: prevState.qty +1
+    //         };
+    //     }, () => {
+    //         console.log(this.state)
+    //     });
+    // }
+
+    // decreaseQty = () => {
         
-        const {qty} = this.state;
-        if(qty === 0){
-            return ;
-        }
+    //     const {qty} = this.state;
+    //     if(qty === 0){
+    //         return ;
+    //     }
 
-        this.setState((prevState) => {
-            return {
-                qty : prevState.qty - 1
-            }
-        })
-    }
+    //     this.setState((prevState) => {
+    //         return {
+    //             qty : prevState.qty - 1
+    //         }
+    //     })
+    // }
 
     render(){
         
-        console.log(this.props);
-        
+        // console.log(this.props);
+
         const {title , price , qty} = this.props.product;
+        //destructure props 
+        const { product , onIncreaseQuantity , onDecreaseQuantity , onDeleteProduct } = this.props;
 
         return (
             <div className="cart-item">
@@ -66,14 +72,17 @@ class CartItem extends React.Component{
                         <img 
                            alt="increase" className="action-icons" 
                            src="https://cdn-icons-png.flaticon.com/128/3303/3303893.png"
-                           onClick={this.increaseQuantity}
+                           onClick={() => onIncreaseQuantity(product)}
                             // onClick={this.increaseQuantity.bind(this)} 
                         />
                         <img alt="decrease" className="action-icons" 
                            src="https://cdn-icons-png.flaticon.com/128/1828/1828906.png"
-                           onClick={this.decreaseQty} 
+                           onClick={() => onDecreaseQuantity(product)} 
                         />
-                        <img alt="delete" className="action-icons" src="https://cdn-icons-png.flaticon.com/128/1214/1214428.png" />
+                        <img alt="delete" className="action-icons" 
+                           src="https://cdn-icons-png.flaticon.com/128/1214/1214428.png"
+                           onClick={() => onDeleteProduct(product.id)}
+                        />
                     </div>
                 </div>
             </div>
