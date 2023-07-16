@@ -51,6 +51,7 @@ class App extends React.Component{
 
     this.db
       .collection('products')
+      .orderBy('price')
       .onSnapshot((snapshot) => {
 
         //this will print querySnapshot
