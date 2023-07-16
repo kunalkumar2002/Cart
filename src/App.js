@@ -1,6 +1,8 @@
 import React from 'react';
 import Cart from "./Cart";
 import Navbar from "./Navebar";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
 class App extends React.Component{
 
@@ -8,32 +10,74 @@ class App extends React.Component{
   constructor(){
     super();
     this.state = {
-        products:[
-            {
-                title :'Mobile Phone',
-                price : 999,
-                qty : 1,
-                img : 'https://m.media-amazon.com/images/I/51l-iIutivL._AC_UF1000,1000_QL80_.jpg'  ,
-                id: 1,
-            },
-            {
-                title :'Watch',
-                price : 99,
-                qty : 2,
-                img : 'https://images.pexels.com/photos/2113994/pexels-photo-2113994.jpeg?cs=srgb&dl=pexels-joey-nguy%E1%BB%85n-2113994.jpg&fm=jpg'  ,
-                id: 2,
-            },
-            {
-                title :'Leptop',
-                price : 999,
-                qty : 1,
-                img : 'https://web.s-cdn.boostkit.dev/webaction-files/5ac4f587beef72050ad4e284_product_images/2a7dbfd4-9018-46e5-88d8-7767bad952c4-60fa1d9c67e30f00018f1f0f.png'  ,
-                id: 3,
-            }
-        ]
+      //fetching data through firebase so pproduct is empty;
+        products:[],
+        //set loder
+        loading : true
+       
     }
+    this.db = firebase.firestore();
     //we can also bind here 
     // this.increaseQuantity = this.increaseQuantity.bind(this)
+
+  }
+
+  componentDidMount(){
+    // firebase
+    //   .firestore()
+    //   .collection('products')
+    //   .get()
+    //   .then((snapshot) => {
+    //     console.log(snapshot);
+    //     snapshot.docs.map((doc) => {
+    //       console.log(doc.data());
+    //       return doc ;
+    //     })
+
+    //     const products = snapshot.docs.map((doc) => {
+
+    //       const data = doc.data();
+    //       data['id'] = doc.id;
+    //       return data;
+
+    //     })
+
+    //     this.setState({
+    //       products : products,
+    //       loading:false
+    //     })
+
+    //   })
+
+    this.db
+      .collection('products')
+      .onSnapshot((snapshot) => {
+
+        //this will print querySnapshot
+
+        // console.log(snapshot);
+        
+        //querySnap returns a docs in form of array where all data is stored inn form of object
+
+        // snapshot.docs.map((doc) => {
+        //   console.log(doc.data())
+        //   return doc;
+        // });
+
+        const products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          data['id'] = doc.id;
+          return data;
+        })
+
+        this.setState({
+          products,
+          loading:false,
+        })
+
+      })
+      
   }
 
   handleIncreaseQuantity = (product) =>{
@@ -41,10 +85,13 @@ class App extends React.Component{
       const { products } = this.state;
       const index = products.indexOf(product);
 
-      products[index].qty += 1;
+      const prodRef = this.db.collection('products').doc(products[index].id);
 
-      this.setState({
-          products : products
+      prodRef.update({
+        qty: products[index].qty + 1
+      })
+      .then(() => {
+        console.log('update sucessfully');
       })
   }
 
@@ -58,24 +105,39 @@ class App extends React.Component{
           return ;
       }
 
-      products[index].qty -= 1;
+      // products[index].qty -= 1;
 
-      this.setState({
-          products : products
+      // this.setState({
+      //     products : products
+      // })
+
+      const prodRef = this.db.collection('products').doc(products[index].id);
+
+      prodRef.update({
+        qty: products[index].qty - 1
+      })
+      .then(() => {
+        console.log('update sucessfully');
       })
   }
 
   handleDeleteProduct = (id) =>{
 
-      const {products} = this.state;
+      // const {products} = this.state;
 
-      const item = products.filter((item) => 
-          item.id !== id
-      )
+      const prodRef = this.db.collection('products').doc(id);
 
-      this.setState({
-          products :item
+      prodRef.delete()
+      .then(() => {
+        console.log('deleted sucessfully');
       })
+      // const item = products.filter((item) => 
+      //     item.id !== id
+      // )
+
+      // this.setState({
+      //     products :item
+      // })
   }
   getcartCount = () => {
     const {products} = this.state;
@@ -92,28 +154,54 @@ class App extends React.Component{
     const { products } = this.state;
     
     let cartTotal = 0;
-    products.map((product) =>{
-      cartTotal = cartTotal + product.qty*product.price;
-    })
-    
-    return cartTotal;
+    products.forEach((product) => {
+    cartTotal += product.qty * product.price;
+  });
+  
+  return cartTotal;
+  }
+  
+
+  //check component mount function
+  // componentDidMount(){
+  //   console.log("component mounted");
+  //   // this.setState({value:2})
+  // }
+
+  addProduct = () => {
+    this.db
+      .collection('products')
+      .add({
+        img : '',
+        price:990,
+        qty : 2,
+        title : 'washing machine'
+      })
+      .then((docref) => {
+        console.log('product has been added' , docref)
+      })
+      .catch ((error) => {
+        console.log('error',error);
+      })
   }
 
   render(){
-
-    const { products } = this.state;
+    
+    // console.log('rendeer')
+    const { products ,loading } = this.state;
 
     return (
       <div className="App">
         {/* <h1> Cart </h1> */}
         <Navbar count={this.getcartCount()} />
+        <button onClick={this.addProduct} style={{padding: 20 , fontSize:20}}> Add a product </button>
         <Cart 
            products = {products}
            onIncreaseQuantity = {this.handleIncreaseQuantity}
            onDecreaseQuantity = {this.handleDecreaseQuantity}
            onDeleteProduct = {this.handleDeleteProduct}
         />
-
+        {loading && <h1> Loading Products ... </h1> }
         <div style={{padding: 10 , fontSize: 20}} >Total: {this.totalPrice()} </div>
 
       </div>
